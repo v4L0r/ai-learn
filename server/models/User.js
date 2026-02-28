@@ -35,4 +35,8 @@ userSchema.methods.matchPassword = async function (plainPassword) {
   return await bcrypt.compare(plainPassword, this.password);
 };
 
+<<<<<<< HEAD
 module.exports = mongoose.model('User', userSchema);
+=======
+module.exports = mongoose.model('User', userSchema);
+>>>>>>> origin/feature/auth-setup

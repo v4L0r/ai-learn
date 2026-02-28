@@ -1,23 +1,16 @@
 const mongoose = require('mongoose');
 
-const topicSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: [true, 'Please add a title'],
-    trim: true,
+const topicSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    prompt: { type: String, required: true, trim: true },
+    response: { type: String, default: '' },
   },
-  description: {
-    type: String,
-    trim: true,
-    default: '',
-  },
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
-}, {
-  timestamps: true,
-});
+  { timestamps: true }
+);
 
 module.exports = mongoose.model('Topic', topicSchema);

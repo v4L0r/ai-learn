@@ -1,6 +1,5 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 
 // Helper function to generate JWT
 const generateToken = (id) => {
@@ -13,29 +12,26 @@ const generateToken = (id) => {
 // @route   POST /api/auth/register
 exports.registerUser = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    // 1. Changed 'username' to 'name' to match your teammate's model
+    const { name, email, password } = req.body;
 
-    // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Create user
+    // 2. We no longer need to hash the password here! 
+    // Your teammate's pre('save') hook in the model will handle it automatically.
     const user = await User.create({
-      username,
+      name,
       email,
-      password: hashedPassword,
+      password,
     });
 
     if (user) {
       res.status(201).json({
         _id: user.id,
-        username: user.username,
+        name: user.name,
         email: user.email,
         token: generateToken(user._id),
       });
@@ -53,14 +49,14 @@ exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user by email
-    const user = await User.findOne({ email });
+    // 3. We must add .select('+password') because your teammate set select: false in the model
+    const user = await User.findOne({ email }).select('+password');
 
-    // Check password
-    if (user && (await bcrypt.compare(password, user.password))) {
+    // 4. We now use the custom matchPassword method your teammate wrote!
+    if (user && (await user.matchPassword(password))) {
       res.json({
         _id: user.id,
-        username: user.username,
+        name: user.name, // Changed from username
         email: user.email,
         token: generateToken(user._id),
       });
